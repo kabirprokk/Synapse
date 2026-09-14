@@ -14,6 +14,7 @@ export const TransmissionSection: React.FC = () => {
   const [classification, setClassification] = useState('bug');
   const [message, setMessage] = useState('');
   const [isSent, setIsSent] = useState(false);
+  const [formError, setFormError] = useState('');
   const [sentList, setSentList] = useState<StoredTransmission[]>([]);
 
   // Load real saved messages from localStorage on mount
@@ -30,7 +31,11 @@ export const TransmissionSection: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!operatorName.trim() || !commFrequency.trim() || !message.trim()) return;
+    if (!operatorName.trim() || !commFrequency.trim() || !message.trim()) {
+      setFormError('Please fill name, email, and message — all three are required.');
+      return;
+    }
+    setFormError('');
 
     soundManager.playTone(700, 'sine', 0.12, 0.04);
 
@@ -170,7 +175,7 @@ export const TransmissionSection: React.FC = () => {
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Share what you observed or any suggestions you have..."
+                    placeholder="e.g. seed 42, depth 6, Lake missed block at (1,1) in round 12"
                   className="w-full bg-[#060e20]/80 border border-[#494454]/40 rounded-xl p-4 text-[#dae2fd] placeholder:text-[#cbc3d7]/40 focus:border-[#00eefc] focus:ring-1 focus:ring-[#00eefc] outline-none text-sm transition-all resize-y min-h-[100px]"
                 />
               </div>
@@ -191,6 +196,16 @@ export const TransmissionSection: React.FC = () => {
                 </button>
               </div>
             </form>
+
+            {/* Error message */}
+            {formError && (
+              <div
+                role="alert"
+                className="mt-4 p-4 rounded-xl bg-red-950/60 border border-red-400/40 text-red-200 text-sm"
+              >
+                {formError}
+              </div>
+            )}
 
             {/* Success Toast */}
             {isSent && (
@@ -270,7 +285,7 @@ export const TransmissionSection: React.FC = () => {
               </h3>
               <div className="space-y-2 text-xs">
                 <a
-                  href="https://github.com"
+                  href="https://github.com/kabirprokk/Synapse"
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-between p-3 rounded-xl bg-[#060e20]/80 border border-[#494454]/30 hover:border-[#00eefc]/50 hover:text-[#00eefc] transition-colors group"

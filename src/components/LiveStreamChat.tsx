@@ -104,7 +104,7 @@ export const LiveStreamChat: React.FC<LiveStreamChatProps> = ({
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Add a lab note (stored locally)..."
+          placeholder="e.g. Round 12: Lake explored a corner at ε=5% — note what happened…"
           className="flex-1 bg-[#0a1224] border border-[#222f4d] rounded-full px-4 py-2 text-xs font-sans text-[#dae2fd] placeholder-[#8899b7]/50 focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50"
         />
         <button

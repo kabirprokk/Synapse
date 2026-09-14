@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FlaskConical, Download, RotateCcw, Dna } from 'lucide-react';
+import { FlaskConical, Download, RotateCcw, Dna, CheckCircle2 } from 'lucide-react';
 
 interface ExperimentPanelProps {
   seed: number;
@@ -33,6 +33,7 @@ export const ExperimentPanel: React.FC<ExperimentPanelProps> = ({
   eloLake, eloLava, eloHuman, outcomes,
 }) => {
   const [seedInput, setSeedInput] = useState(String(seed));
+  const [notice, setNotice] = useState('');
 
   const last20 = outcomes.slice(-20);
   const lakeWins = last20.filter(o => o === 'O').length;
@@ -89,10 +90,10 @@ export const ExperimentPanel: React.FC<ExperimentPanelProps> = ({
           Last {last20.length}: <span className="text-[#00f0ff] font-bold">Lake {lakeWins}</span> • <span className="text-[#ff99a8] font-bold">Lava {lavaWins}</span> • <span className="text-[#dae2fd]">Draw {draws}</span> • total {matchCount}
         </div>
         <div className="flex gap-2 ml-auto">
-          <button onClick={onExportCsv} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#131d36] border border-[#293b66] hover:border-[#00f0ff] text-xs font-mono font-bold cursor-pointer">
+          <button onClick={() => { onExportCsv(); setNotice('Match log exported as CSV.'); setTimeout(() => setNotice(''), 4000); }} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#131d36] border border-[#293b66] hover:border-[#00f0ff] text-xs font-mono font-bold cursor-pointer min-h-[2.5rem]">
             <Download className="w-3.5 h-3.5" /> CSV
           </button>
-          <button onClick={onExportJson} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#131d36] border border-[#293b66] hover:border-[#00f0ff] text-xs font-mono font-bold cursor-pointer">
+          <button onClick={() => { onExportJson(); setNotice('Full experiment exported as JSON.'); setTimeout(() => setNotice(''), 4000); }} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#131d36] border border-[#293b66] hover:border-[#00f0ff] text-xs font-mono font-bold cursor-pointer min-h-[2.5rem]">
             <Download className="w-3.5 h-3.5" /> JSON
           </button>
           <button onClick={onReset} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#3d161d] border border-[#591b26] hover:border-[#ff334b] text-xs font-mono font-bold text-[#ff99a8] cursor-pointer">
@@ -100,6 +101,11 @@ export const ExperimentPanel: React.FC<ExperimentPanelProps> = ({
           </button>
         </div>
       </div>
+      {notice && (
+        <p role="status" className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-300">
+          <CheckCircle2 className="w-3.5 h-3.5" /> {notice}
+        </p>
+      )}
       <p className="font-mono text-[10px] text-[#8899b7]/70">
         Methods: alternating starter (fair), Bellman Q-update on terminal reward, Gaussian genome mutation on loss only, Elo K=16. Timings measured with performance.now() in this tab. No network, no fake viewers.
       </p>

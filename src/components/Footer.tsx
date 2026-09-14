@@ -4,60 +4,53 @@
  */
 
 import React from 'react';
-import { Waves, Flame } from 'lucide-react';
+import { Logo } from './Logo';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const year = new Date().getFullYear();
+
   return (
     <footer
       id="main-footer"
-      className="w-full bg-[#03060d] border-t border-[#1e2c4a] py-8 relative z-10"
+      className="w-full border-t border-white/5 py-12 relative z-10 overflow-x-hidden"
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <Waves className="w-4 h-4 text-[#00f0ff]" />
-            <Flame className="w-4 h-4 text-[#ff334b]" />
-          </div>
-          <span className="font-headline text-sm font-bold tracking-wider">
-            <span className="text-[#00f0ff]">Ai Lake-1</span>{' '}
-            <span className="text-[#8899b7]">vs</span>{' '}
-            <span className="text-[#ff334b]">Ai Lava-1</span>
-          </span>
-          <span className="font-mono text-xs text-[#8899b7]">
-            • Cloud-synced lab • synarena.web.app
+      <div className="max-w-6xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <Logo size={30} />
+          <span className="flex flex-col">
+            <span className="font-headline text-sm font-bold text-white">Synarena</span>
+            <span className="font-mono text-[11px] text-slate-500">
+              © {year} Synarena lab · Q-Learning vs Minimax
+            </span>
           </span>
         </div>
 
-        <div className="flex items-center gap-4 font-mono text-xs text-[#8899b7]">
-          <button
-            onClick={() => onNavigate('arena')}
-            className="hover:text-[#00f0ff] transition-colors cursor-pointer"
-          >
-            Live Stream
+        <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs text-slate-400 min-w-0">
+          <button onClick={() => onNavigate('arena')} className="hover:text-white transition-colors cursor-pointer min-h-[2.5rem]">
+            Arena
           </button>
-          <span>•</span>
-          <button
-            onClick={() => onNavigate('about')}
-            className="hover:text-[#ff334b] transition-colors cursor-pointer"
-          >
+          <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer min-h-[2.5rem]">
             How It Works
           </button>
-          <span>•</span>
-          <button
-            onClick={() => onNavigate('contact')}
-            className="hover:text-[#dae2fd] transition-colors cursor-pointer"
-          >
+          <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors cursor-pointer min-h-[2.5rem]">
             Feedback
           </button>
-        </div>
-
-        <div className="text-xs text-[#8899b7]/70">
-          Continuous zero-sum autonomous reinforcement learning &amp; genetic minimax stream.
-        </div>
+          <a
+            href="https://github.com/kabirprokk/Synapse"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-white transition-colors break-all"
+          >
+            GitHub
+          </a>
+          <a href="mailto:kabirsayed.k@gmail.com" className="hover:text-white transition-colors break-all">
+            kabirsayed.k@gmail.com
+          </a>
+        </nav>
       </div>
     </footer>
   );

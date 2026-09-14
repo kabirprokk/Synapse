@@ -546,6 +546,15 @@ export default function App() {
   };
 
   useEffect(() => {
+    const titles: Record<string, string> = {
+      arena: 'Synarena — Arena',
+      about: 'How It Works — Synarena',
+      contact: 'Feedback — Synarena',
+    };
+    document.title = titles[activeSection] ?? 'Synarena — Q-Learning vs Minimax Lab';
+  }, [activeSection]);
+
+  useEffect(() => {
     const sectionIds = ['arena', 'about', 'contact'];
     const elements = sectionIds.map(id => document.getElementById(id)).filter((el): el is HTMLElement => el !== null);
     const observer = new IntersectionObserver(entries => {
@@ -561,19 +570,30 @@ export default function App() {
   const humanTurnNow = isHumanTurn(currentPlayer, playMode) && !winningResult;
 
   return (
-    <div className="min-h-screen bg-[#040812] font-sans text-[#dae2fd] relative selection:bg-[#00f0ff] selection:text-[#040812]">
-      <div className="fixed top-0 left-0 right-0 h-1 z-50 bg-[#0d162a] pointer-events-none">
-        <div className="h-full bg-gradient-to-r from-[#00f0ff] via-[#a078ff] to-[#ff334b] transition-all duration-150 shadow-[0_0_10px_#00f0ff]" style={{ width: `${scrollProgress}%` }} />
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-200 relative overflow-x-hidden selection:bg-cyan-300 selection:text-slate-950 min-w-0">
+      <div className="fixed top-0 left-0 right-0 h-0.5 z-50 bg-white/5 pointer-events-none">
+        <div className="h-full bg-white/30 transition-all duration-150" style={{ width: `${scrollProgress}%` }} />
       </div>
-      <div className="fixed -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-[#00f0ff]/10 blur-[180px] pointer-events-none animate-float-slow" />
-      <div className="fixed top-1/2 -right-40 w-[600px] h-[600px] rounded-full bg-[#ff334b]/10 blur-[180px] pointer-events-none animate-float-reverse" />
-      <div className="fixed -bottom-40 left-1/3 w-[550px] h-[550px] rounded-full bg-[#0088cc]/10 blur-[180px] pointer-events-none animate-float-slow" />
+      <div className="fixed -top-48 left-1/2 -translate-x-1/2 w-[700px] h-[380px] rounded-full bg-cyan-400/[0.05] blur-[140px] pointer-events-none" />
 
       <Header round={round} viewerCount={1} activeSection={activeSection} onNavigate={handleNavigate} isMuted={isMuted} onToggleMute={handleToggleMute} onOpenInspector={() => setIsInspectorOpen(true)} />
 
-      <main className="w-full pt-20 bg-transparent relative z-10">
-        <section id="arena" className="relative w-full min-h-[calc(100vh-5rem)] flex flex-col justify-center px-4 md:px-6 lg:px-8 py-6 scroll-mt-24">
-          <div className="max-w-7xl mx-auto w-full flex flex-col gap-5">
+      <main className="w-full pt-24 bg-transparent relative z-10 min-w-0">
+        <section id="arena" className="relative w-full px-4 md:px-6 py-14 md:py-20 scroll-mt-24">
+          <div className="max-w-5xl mx-auto w-full flex flex-col gap-10 md:gap-14 min-w-0">
+            {/* Hero — the game first */}
+            <div className="text-center flex flex-col items-center gap-3 px-2">
+              <p className="font-mono text-[11px] tracking-[0.22em] uppercase text-slate-500">
+                Seeded · Measurable · Human-playable
+              </p>
+              <h1 className="font-headline text-3xl md:text-5xl font-extrabold tracking-tight text-white text-balance">
+                Watch two algorithms learn.
+              </h1>
+              <p className="text-sm md:text-base text-slate-400 max-w-xl text-balance">
+                Lake-1 explores with Q-Learning. Lava-1 plans with Minimax. Play them, tune them, export the data.
+              </p>
+            </div>
+
             <LiveStreamHud
               round={round} uptimeSeconds={uptimeSeconds} viewerCount={1}
               speed={speed} isViewingPast={isViewingPast} viewingPly={viewingPly}
@@ -612,7 +632,7 @@ export default function App() {
               </span>
             </div>
 
-            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start min-w-0">
               <div className="lg:col-span-3 flex flex-col order-2 lg:order-1">
                 <AgentCardLake telemetry={lakeTelemetry} isActive={currentPlayer === 'O'} />
               </div>
@@ -632,19 +652,36 @@ export default function App() {
               </div>
             </div>
 
-            <ExperimentPanel
-              seed={seed} onApplySeed={handleApplySeed}
-              alpha={lakeRef.current?.alpha ?? 0.2} gamma={lakeRef.current?.gamma ?? 0.95}
-              epsilon={lakeRef.current?.epsilon ?? 0.05} mutationSigma={lavaRef.current?.mutationSigma ?? 0.035}
-              maxDepth={lavaRef.current?.maxDepth ?? 6}
-              onHyper={handleHyper} onExportCsv={handleExportCsv} onExportJson={handleExportJson}
-              onReset={handleResetExperiment} matchCount={matchHistory.length}
-              eloLake={eloLake} eloLava={eloLava} eloHuman={eloHuman} outcomes={outcomes}
-            />
+            {/* Lab controls live below the fold — first viewport stays clean */}
+            <details className="w-full glass rounded-2xl px-5 py-4 group">
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-3 min-h-[2.75rem]">
+                <span className="font-headline text-sm font-semibold text-white">Lab controls</span>
+                <span className="font-mono text-xs text-slate-500 group-open:hidden">Show seed, hyperparams, export ↓</span>
+                <span className="font-mono text-xs text-slate-500 hidden group-open:inline">Hide ↑</span>
+              </summary>
+              <div className="pt-4">
+                <ExperimentPanel
+                  seed={seed} onApplySeed={handleApplySeed}
+                  alpha={lakeRef.current?.alpha ?? 0.2} gamma={lakeRef.current?.gamma ?? 0.95}
+                  epsilon={lakeRef.current?.epsilon ?? 0.05} mutationSigma={lavaRef.current?.mutationSigma ?? 0.035}
+                  maxDepth={lavaRef.current?.maxDepth ?? 6}
+                  onHyper={handleHyper} onExportCsv={handleExportCsv} onExportJson={handleExportJson}
+                  onReset={handleResetExperiment} matchCount={matchHistory.length}
+                  eloLake={eloLake} eloLava={eloLava} eloHuman={eloHuman} outcomes={outcomes}
+                />
+              </div>
+            </details>
 
-            <div className="w-full max-w-4xl mx-auto mt-2">
-              <LiveStreamChat comments={comments} onSendMessage={handleSendComment} viewerCount={1} />
-            </div>
+            <details className="w-full max-w-3xl mx-auto glass rounded-2xl px-5 py-4 group">
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-3 min-h-[2.75rem]">
+                <span className="font-headline text-sm font-semibold text-white">Session log</span>
+                <span className="font-mono text-xs text-slate-500 group-open:hidden">Show experiment events ↓</span>
+                <span className="font-mono text-xs text-slate-500 hidden group-open:inline">Hide ↑</span>
+              </summary>
+              <div className="pt-4">
+                <LiveStreamChat comments={comments} onSendMessage={handleSendComment} viewerCount={1} />
+              </div>
+            </details>
           </div>
         </section>
 
