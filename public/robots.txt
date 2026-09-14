@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://synarena.web.app/sitemap.xml
