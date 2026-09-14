@@ -14,7 +14,9 @@
     "test": "vitest run",
     "deploy": "npm run build && firebase deploy --only hosting,firestore",
     "deploy:hosting": "npm run build && firebase deploy --only hosting",
-    "deploy:main": "npm run build && firebase deploy --only hosting:synapse-ai-inovation"
+    "deploy:main": "npm run build && firebase deploy --only hosting:synarena",
+    "deploy:synarena": "npm run build && firebase deploy --only hosting:synarena",
+    "deploy:default-site": "npm run build && firebase deploy --only hosting:synapse-ai-inovation"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

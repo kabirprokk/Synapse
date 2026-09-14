@@ -39,11 +39,11 @@ npm i -g firebase-tools
 firebase login
 firebase use synapse-ai-inovation
 npm run build
-firebase deploy --only hosting:synapse-ai-inovation
+firebase deploy --only hosting:synarena
 # or both live sites at once:
 # npm run deploy:hosting
 ```
-Live URLs: `https://synapse-ai-inovation.web.app`, `https://synarena.web.app`.
+Live URL (primary): `https://synarena.web.app`. Also live: `https://synapse-ai-inovation.web.app`.
 
 > If you see `Error: Failed to make request to .../sites/synarena`, it is a
 > transient Hosting API / network failure (the site exists). Re-run the deploy,
