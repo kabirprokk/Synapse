@@ -33,13 +33,23 @@ App signs in anonymously, pushes every match to `matches`, refreshes `leaderboar
 Enable in console (one time):
 1. Authentication → Sign-in method → Anonymous → Enable.
 2. Firestore Database → Create → `matches` + `leaderboard` collections (rules in `firestore.rules`).
-3. Hosting → Get started. Then deploy:
+3. Hosting → Get started. Then deploy — **run the build BEFORE deploy**:
 ```bash
 npm i -g firebase-tools
 firebase login
-firebase deploy --only hosting,firestore
+firebase use synapse-ai-inovation
+npm run build
+firebase deploy --only hosting:synapse-ai-inovation
+# or both live sites at once:
+# npm run deploy:hosting
 ```
-Live URL: `https://synapse-ai-inovation.web.app`.
+Live URLs: `https://synapse-ai-inovation.web.app`, `https://synarena.web.app`.
+
+> If you see `Error: Failed to make request to .../sites/synarena`, it is a
+> transient Hosting API / network failure (the site exists). Re-run the deploy,
+> or deploy one site at a time. If it persists: `firebase login --reauth`,
+> then `firebase hosting:sites:list` to confirm both `synarena` and
+> `synapse-ai-inovation` are listed.
 
 Env override: copy `.env.example` → `.env`, fill `VITE_FIREBASE_*` to fork to your own project.
 

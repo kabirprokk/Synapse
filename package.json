@@ -11,7 +11,10 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "deploy": "npm run build && firebase deploy --only hosting,firestore",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:main": "npm run build && firebase deploy --only hosting:synapse-ai-inovation"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
