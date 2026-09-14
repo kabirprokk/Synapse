@@ -38,6 +38,14 @@ import {
   downloadText,
   DEFAULT_CONFIG,
 } from './services/experiment';
+import { initAnalytics } from './services/firebase';
+import {
+  ensureAnonymousAuth,
+  pushMatchCloud,
+  pushGlobalElo,
+  fetchGlobalElo,
+  type CloudElo,
+} from './services/cloud';
 
 import { Header } from './components/Header';
 import { LiveStreamHud } from './components/LiveStreamHud';
@@ -78,6 +86,11 @@ export default function App() {
   const [eloLake, setEloLake] = useState<number>(() => loadJSON<number>('synapse.elo.lake', ELO_INITIAL));
   const [eloLava, setEloLava] = useState<number>(() => loadJSON<number>('synapse.elo.lava', ELO_INITIAL));
   const [eloHuman, setEloHuman] = useState<number>(() => loadJSON<number>('synapse.elo.human', ELO_INITIAL));
+
+  // Firebase cloud state (local-first, syncs when online)
+  const [cloudUid, setCloudUid] = useState<string | null>(null);
+  const [cloudOk, setCloudOk] = useState<boolean | null>(null);
+  const [globalElo, setGlobalElo] = useState<CloudElo | null>(null);
 
   const matchStartTimeRef = useRef<number>(Date.now());
   const movesCountRef = useRef<number>(0);
@@ -154,6 +167,16 @@ export default function App() {
       setUptimeSeconds(Math.floor((Date.now() - sessionStartRef.current) / 1000));
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Firebase: analytics + anonymous auth + global Elo (non-blocking, local-first)
+  useEffect(() => {
+    initAnalytics();
+    const off = ensureAnonymousAuth(u => setCloudUid(u?.uid ?? null));
+    fetchGlobalElo().then(g => {
+      if (g) { setGlobalElo(g); setCloudOk(true); }
+    }).catch(() => setCloudOk(false));
+    return off;
   }, []);
 
   const calculateFitness = useCallback((recentOutcomes: string[]) => {
@@ -286,6 +309,15 @@ export default function App() {
     };
     setMatchHistory(prev => [logEntry, ...prev].slice(0, 100));
     pushLog(`Round #${round}: ${outcomeDesc} (${movesCountRef.current} plies, ${(durationMs / 1000).toFixed(1)}s, mode=${playMode}).`);
+
+    // Cloud sync (fire-and-forget, local-first). Requires Firestore + Anonymous Auth enabled.
+    pushMatchCloud(logEntry, playMode, getGlobalSeed()).then(ok => setCloudOk(ok));
+    // Throttle global Elo writes: every 5th round to save Firestore writes.
+    if ((round + 1) % 5 === 0) {
+      pushGlobalElo({ lake: eloLake, lava: eloLava, human: eloHuman, matches: round + 1 }).then(ok => {
+        if (ok) setGlobalElo({ lake: eloLake, lava: eloLava, human: eloHuman, matches: round + 1 });
+      });
+    }
 
     setOutcomes(prev => {
       const next = [...prev, matchOutcome].slice(-24);
@@ -568,6 +600,22 @@ export default function App() {
               <span className="font-mono text-[11px] text-[#8899b7] ml-auto">
                 Session {Math.floor(uptimeSeconds / 60)}m {uptimeSeconds % 60}s • Seed {seed} • Elo L:{eloLake} V:{eloLava} H:{eloHuman} • {latencyMs}ms last decision (measured)
               </span>
+            </div>
+
+            {/* Firebase cloud status — synapse-ai-inovation */}
+            <div className="w-full flex flex-wrap items-center gap-2 bg-[#060a14]/90 border border-[#222f4d] rounded-2xl px-3 py-2 font-mono text-[11px]">
+              <span className={`w-2 h-2 rounded-full ${cloudUid ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-amber-400 animate-pulse'}`} />
+              <span className="text-[#dae2fd] font-bold">
+                {cloudUid ? `Firebase connected • anon ${cloudUid.slice(0, 6)}…` : 'Firebase connecting… (enable Anonymous Auth)'}
+              </span>
+              <span className="text-[#8899b7]">
+                project: synapse-ai-inovation • {cloudOk === true ? 'last cloud write OK' : cloudOk === false ? 'local only (check Firestore rules)' : 'sync pending'} • live at synapse-ai-inovation.web.app after deploy
+              </span>
+              {globalElo && (
+                <span className="ml-auto text-[#7df4ff]">
+                  Global Elo L:{globalElo.lake} V:{globalElo.lava} H:{globalElo.human} ({globalElo.matches} matches)
+                </span>
+              )}
             </div>
 
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">

@@ -22,7 +22,26 @@ npm test         # vitest run
 npm run build
 ```
 
-No backend, no API keys. All computation is client-side.
+No backend required for local use — all computation is client-side. Firebase is optional cloud sync.
+
+## Firebase (synapse-ai-inovation) — connected
+
+Project: `synapse-ai-inovation` (`synapse-ai-inovation.web.app` after deploy).
+Client files: `src/services/firebase.ts`, `src/services/cloud.ts`.
+App signs in anonymously, pushes every match to `matches`, refreshes `leaderboard/global` every 5 rounds. Offline → local-only, no crash.
+
+Enable in console (one time):
+1. Authentication → Sign-in method → Anonymous → Enable.
+2. Firestore Database → Create → `matches` + `leaderboard` collections (rules in `firestore.rules`).
+3. Hosting → Get started. Then deploy:
+```bash
+npm i -g firebase-tools
+firebase login
+firebase deploy --only hosting,firestore
+```
+Live URL: `https://synapse-ai-inovation.web.app`.
+
+Env override: copy `.env.example` → `.env`, fill `VITE_FIREBASE_*` to fork to your own project.
 
 ## Methods
 
