@@ -151,28 +151,6 @@ export class LakeQLearningAgent {
     return q;
   }
 
-  /**
-   * One-ply tactics: immediate win first, then block opponent's immediate win.
-   * Keeps Lake competitive vs minimax from game 1 while Q-values are still
-   * untrained. Tactical moves are still recorded in history so Bellman updates
-   * reinforce them — learning and tactics compound instead of competing.
-   */
-  public findTacticalMove(b: BoardState, symbol: 'O' | 'X' = 'O'): number | null {
-    const tryComplete = (s: 'O' | 'X'): number | null => {
-      for (const combo of WINNING_COMBOS) {
-        const [i, j, k] = combo;
-        const line = [b[i], b[j], b[k]];
-        if (line.filter(v => v === s).length === 2 && line.includes(null)) {
-          const idx = [i, j, k].find(n => b[n] === null);
-          if (idx !== undefined) return idx;
-        }
-      }
-      return null;
-    };
-    // Own immediate win takes priority over blocking.
-    return tryComplete(symbol) ?? tryComplete(symbol === 'O' ? 'X' : 'O');
-  }
-
   public chooseAction(b: BoardState): QDecision | null {
     const available: number[] = [];
     for (let i = 0; i < 9; i++) {
@@ -185,14 +163,8 @@ export class LakeQLearningAgent {
 
     let selectedAction: number;
     let isExploratory = false;
-    let isTactical = false;
 
-    // Never miss a one-move win or block — even while exploring.
-    const tactical = this.findTacticalMove(b, 'O');
-    if (tactical !== null && available.includes(tactical)) {
-      selectedAction = tactical;
-      isTactical = true;
-    } else if (this.rng() < this.epsilon) {
+    if (this.rng() < this.epsilon) {
       selectedAction = available[Math.floor(this.rng() * available.length)];
       isExploratory = true;
     } else {
@@ -217,7 +189,7 @@ export class LakeQLearningAgent {
     const r = Math.floor(selectedAction / 3);
     const c = selectedAction % 3;
     const qStr = (this.lastQVal >= 0 ? '+' : '') + this.lastQVal.toFixed(2);
-    this.lastActionDesc = `Cell (${r},${c}) • Q: ${qStr}${isExploratory ? ' [Explore]' : ''}${isTactical ? ' [Tactical]' : ''}`;
+    this.lastActionDesc = `Cell (${r},${c}) • Q: ${qStr}${isExploratory ? ' [Explore]' : ''}`;
 
     return {
       action: selectedAction,
