@@ -126,7 +126,7 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
       {/* 3x3 Tactile Grid Stage */}
       <div
         id="board-grid-wrapper"
-        className="relative w-full aspect-square bg-[#060a14]/95 rounded-3xl border-2 border-[#1e2c4a] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9),inset_0_0_40px_rgba(0,0,0,0.8)] flex items-center justify-center backdrop-blur-2xl overflow-hidden group"
+        className="relative w-full aspect-square bg-white/[0.02] rounded-2xl border border-white/10 p-4 flex items-center justify-center overflow-hidden group"
       >
         {/* Subtle Cyber Corner Reticles */}
         <div className="absolute top-2 left-2 font-mono text-[10px] text-[#00f0ff]/50 select-none">
@@ -183,7 +183,7 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
 
                 {/* Symbol: Ai Lake-1 (O) */}
                 {cell === 'O' && (
-                  <div className="relative w-16 h-16 flex items-center justify-center animate-in zoom-in-75 duration-200">
+                  <div className="relative w-20 h-20 flex items-center justify-center animate-in zoom-in-75 duration-200">
                     <svg className="w-full h-full" viewBox="0 0 64 64">
                       {/* Outer ripple ring */}
                       <circle
@@ -214,7 +214,7 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
 
                 {/* Symbol: Ai Lava-1 (X) */}
                 {cell === 'X' && (
-                  <div className="relative w-16 h-16 flex items-center justify-center animate-in zoom-in-75 duration-200">
+                  <div className="relative w-20 h-20 flex items-center justify-center animate-in zoom-in-75 duration-200">
                     <svg className="w-full h-full" viewBox="0 0 64 64">
                       {/* Outer Magma Ember Orbit */}
                       <rect

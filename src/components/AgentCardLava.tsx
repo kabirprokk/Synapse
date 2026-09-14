@@ -19,10 +19,10 @@ export const AgentCardLava: React.FC<AgentCardLavaProps> = ({
   return (
     <div
       id="agent-card-lava"
-      className={`relative rounded-3xl p-5 md:p-6 transition-all duration-300 backdrop-blur-2xl flex flex-col gap-4 border ${
+      className={`relative rounded-2xl p-5 transition-all duration-300 flex flex-col gap-4 border ${
         isActive
-          ? 'bg-[#21090d]/95 border-[#ff334b] shadow-[0_0_35px_rgba(255,51,75,0.3)] ring-1 ring-[#ff334b]/50'
-          : 'bg-[#15070a]/80 border-[#3d161d] hover:border-[#ff334b]/40'
+          ? 'bg-white/[0.05] border-rose-300/40'
+          : 'bg-white/[0.02] border-white/10'
       }`}
     >
       {/* Corner cyber brackets */}
@@ -37,7 +37,7 @@ export const AgentCardLava: React.FC<AgentCardLavaProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-headline text-lg font-bold text-[#dae2fd] tracking-tight">
+              <h2 className="font-headline text-lg font-bold text-white tracking-tight whitespace-nowrap">
                 Ai Lava-1
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#ff334b]/20 text-[#ff334b] border border-[#ff334b]/40">

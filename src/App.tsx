@@ -581,41 +581,35 @@ export default function App() {
               onPrevPly={handlePrevPly} onNextPly={handleNextPly} onJumpToLive={handleJumpToLive}
             />
 
-            {/* Mode + transport controls (real experiment controls) */}
-            <div className="w-full flex flex-wrap items-center gap-2 bg-[#060a14]/90 border border-[#222f4d] rounded-2xl p-3">
-              <span className="font-mono text-[11px] text-[#8899b7] uppercase">Mode:</span>
+            {/* Session controls — one calm row */}
+            <div className="w-full flex flex-wrap items-center gap-2 bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3">
               {(['auto', 'human-lava', 'human-lake'] as PlayMode[]).map(m => (
                 <button key={m} onClick={() => handleModeChange(m)}
-                  className={`px-3 py-1.5 rounded-full font-mono text-xs font-bold transition-all cursor-pointer border ${playMode === m ? 'bg-[#00f0ff] text-[#051b33] border-[#00f0ff]' : 'bg-[#0d162a] text-[#8899b7] border-[#222f4d] hover:text-white'}`}>
+                  className={`px-3.5 py-1.5 rounded-full text-sm transition-all cursor-pointer ${playMode === m ? 'bg-white text-slate-900 font-semibold' : 'text-slate-400 hover:text-white'}`}>
                   {m === 'auto' ? 'AI vs AI' : m === 'human-lava' ? 'You (O) vs Lava' : 'You (X) vs Lake'}
                 </button>
               ))}
-              <span className="w-px h-5 bg-[#222f4d] mx-1" />
-              <button onClick={() => setIsPaused(p => !p)} className="px-3 py-1.5 rounded-full font-mono text-xs font-bold bg-[#131d36] text-[#dae2fd] border border-[#293b66] hover:border-[#00f0ff] cursor-pointer">
-                {isPaused ? '▶ Resume' : '⏸ Pause'}
-              </button>
-              <button onClick={() => { setIsPaused(true); executeStep(); }} className="px-3 py-1.5 rounded-full font-mono text-xs font-bold bg-[#131d36] text-[#dae2fd] border border-[#293b66] hover:border-[#00f0ff] cursor-pointer" title="Advance one ply while paused">
-                Step once
-              </button>
-              <span className="font-mono text-[11px] text-[#8899b7] ml-auto">
-                Session {Math.floor(uptimeSeconds / 60)}m {uptimeSeconds % 60}s • Seed {seed} • Elo L:{eloLake} V:{eloLava} H:{eloHuman} • {latencyMs}ms last decision (measured)
+              <span className="flex items-center gap-1 ml-1">
+                <button onClick={() => setIsPaused(p => !p)} className="px-3 py-1.5 rounded-full text-sm text-slate-300 hover:text-white hover:bg-white/5 cursor-pointer">
+                  {isPaused ? 'Resume' : 'Pause'}
+                </button>
+                <button onClick={() => { setIsPaused(true); executeStep(); }} className="px-3 py-1.5 rounded-full text-sm text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer" title="Advance one ply while paused">
+                  Step
+                </button>
+              </span>
+              <span className="font-mono text-xs text-slate-500 ml-auto">
+                Seed {seed} · L {eloLake} · V {eloLava} · You {eloHuman} · {latencyMs}ms
               </span>
             </div>
 
-            {/* Firebase cloud status — synapse-ai-inovation */}
-            <div className="w-full flex flex-wrap items-center gap-2 bg-[#060a14]/90 border border-[#222f4d] rounded-2xl px-3 py-2 font-mono text-[11px]">
-              <span className={`w-2 h-2 rounded-full ${cloudUid ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-amber-400 animate-pulse'}`} />
-              <span className="text-[#dae2fd] font-bold">
-                {cloudUid ? `Firebase connected • anon ${cloudUid.slice(0, 6)}…` : 'Firebase connecting… (enable Anonymous Auth)'}
+            {/* Cloud status — single quiet line */}
+            <div className="w-full flex items-center gap-2 px-1 font-mono text-[11px] text-slate-500">
+              <span className={`w-1.5 h-1.5 rounded-full ${cloudUid ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+              <span>
+                {cloudUid ? `Synced · synarena.web.app` : 'Connecting…'}
+                {cloudOk === false ? ' · write failed — check Auth + rules' : ''}
+                {globalElo ? ` · global L:${globalElo.lake} V:${globalElo.lava} (${globalElo.matches})` : ''}
               </span>
-              <span className="text-[#8899b7]">
-                live: synarena.web.app • mirror: synapse-ai-inovation.web.app • {cloudOk === true ? 'last cloud write OK' : cloudOk === false ? 'local only (enable Anonymous Auth + check rules)' : 'sync pending'}
-              </span>
-              {globalElo && (
-                <span className="ml-auto text-[#7df4ff]">
-                  Global Elo L:{globalElo.lake} V:{globalElo.lava} H:{globalElo.human} ({globalElo.matches} matches)
-                </span>
-              )}
             </div>
 
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">

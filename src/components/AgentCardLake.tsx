@@ -19,10 +19,10 @@ export const AgentCardLake: React.FC<AgentCardLakeProps> = ({
   return (
     <div
       id="agent-card-lake"
-      className={`relative rounded-3xl p-5 md:p-6 transition-all duration-300 backdrop-blur-2xl flex flex-col gap-4 border ${
+      className={`relative rounded-2xl p-5 transition-all duration-300 flex flex-col gap-4 border ${
         isActive
-          ? 'bg-[#061224]/95 border-[#00f0ff] shadow-[0_0_35px_rgba(0,240,255,0.3)] ring-1 ring-[#00f0ff]/50'
-          : 'bg-[#060e1d]/80 border-[#1a2e4d] hover:border-[#00f0ff]/40'
+          ? 'bg-white/[0.05] border-cyan-300/40'
+          : 'bg-white/[0.02] border-white/10'
       }`}
     >
       {/* Corner cyber brackets */}
@@ -37,7 +37,7 @@ export const AgentCardLake: React.FC<AgentCardLakeProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-headline text-lg font-bold text-[#dae2fd] tracking-tight">
+              <h2 className="font-headline text-lg font-bold text-white tracking-tight whitespace-nowrap">
                 Ai Lake-1
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]/40">
