@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Logo } from './Logo';
+import { LineHoverLink } from './ui/line-hover-link';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -39,17 +40,28 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors cursor-pointer min-h-[2.5rem]">
             Feedback
           </button>
-          <a
+          <button onClick={() => onNavigate('faq')} className="hover:text-white transition-colors cursor-pointer min-h-[2.5rem]">
+            FAQ
+          </button>
+          <button onClick={() => onNavigate('credits')} className="hover:text-white transition-colors cursor-pointer min-h-[2.5rem]">
+            Credits
+          </button>
+          <LineHoverLink
+            variant="arc"
             href="https://github.com/kabirprokk/Synapse"
             target="_blank"
             rel="noreferrer"
             className="hover:text-white transition-colors break-all"
           >
             GitHub
-          </a>
-          <a href="mailto:kabirsayed.k@gmail.com" className="hover:text-white transition-colors break-all">
+          </LineHoverLink>
+          <LineHoverLink
+            variant="arc"
+            href="mailto:kabirsayed.k@gmail.com"
+            className="hover:text-white transition-colors break-all"
+          >
             kabirsayed.k@gmail.com
-          </a>
+          </LineHoverLink>
         </nav>
       </div>
     </footer>

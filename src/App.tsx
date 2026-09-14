@@ -58,6 +58,12 @@ import { TransmissionSection } from './components/TransmissionSection';
 import { AiNavigatorHud } from './components/AiNavigatorHud';
 import { InspectorModal } from './components/InspectorModal';
 import { ExperimentPanel } from './components/ExperimentPanel';
+import { IntroScreen } from './components/IntroScreen';
+import { FaqSection } from './components/FaqSection';
+import { CreditsSection } from './components/CreditsSection';
+import { DissolveReveal } from './components/ui/dissolve-reveal';
+import { AsciiGlitchRipple } from './components/ui/ascii-glitch-ripple';
+import AnimatedButton from './components/ui/animated-button';
 import { Footer } from './components/Footer';
 
 export default function App() {
@@ -78,6 +84,15 @@ export default function App() {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [activeSection, setActiveSection] = useState<string>('arena');
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
+  const [introOpen, setIntroOpen] = useState<boolean>(() => {
+    try {
+      if (sessionStorage.getItem('synarena.intro.seen')) return false;
+      if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false;
+      return true;
+    } catch {
+      return true;
+    }
+  });
 
   // Real session metrics (honest: starts at 0, counts this tab only)
   const sessionStartRef = useRef<number>(Date.now());
@@ -473,6 +488,11 @@ export default function App() {
     setComments(prev => [...prev, newComment].slice(-80));
   };
 
+  const handleIntroEnter = useCallback(() => {
+    setIntroOpen(false);
+    try { sessionStorage.setItem('synarena.intro.seen', '1'); } catch { /* ignore */ }
+  }, []);
+
   const handleModeChange = (m: PlayMode) => {
     soundManager.playUiClick();
     setPlayMode(m);
@@ -485,6 +505,13 @@ export default function App() {
     else { setCurrentPlayer('O'); setStatusText('You are O vs Lava-1 (X). Your move first.'); }
     pushLog(`Mode switched to ${m}. Board reset.`);
   };
+
+  const handlePlayHuman = useCallback(() => {
+    handleModeChange('human-lava');
+    requestAnimationFrame(() => {
+      document.getElementById('board-grid-wrapper')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [handleModeChange, round]);
 
   const handleApplySeed = (s: number) => {
     const clean = Math.max(0, Math.floor(s)) || 0;
@@ -549,13 +576,15 @@ export default function App() {
     const titles: Record<string, string> = {
       arena: 'Synarena — Arena',
       about: 'How It Works — Synarena',
+      faq: 'FAQ — Synarena',
+      credits: 'Credits — Synarena',
       contact: 'Feedback — Synarena',
     };
     document.title = titles[activeSection] ?? 'Synarena — Q-Learning vs Minimax Lab';
   }, [activeSection]);
 
   useEffect(() => {
-    const sectionIds = ['arena', 'about', 'contact'];
+    const sectionIds = ['arena', 'about', 'faq', 'credits', 'contact'];
     const elements = sectionIds.map(id => document.getElementById(id)).filter((el): el is HTMLElement => el !== null);
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => { if (entry.isIntersecting) setActiveSection(entry.target.id); });
@@ -582,16 +611,27 @@ export default function App() {
         <section id="arena" className="relative w-full px-4 md:px-6 py-14 md:py-20 scroll-mt-24">
           <div className="max-w-5xl mx-auto w-full flex flex-col gap-10 md:gap-14 min-w-0">
             {/* Hero — the game first */}
-            <div className="text-center flex flex-col items-center gap-3 px-2">
+            <div className="text-center flex flex-col items-center gap-4 px-2">
               <p className="font-mono text-[11px] tracking-[0.22em] uppercase text-slate-500">
                 Seeded · Measurable · Human-playable
               </p>
               <h1 className="font-headline text-3xl md:text-5xl font-extrabold tracking-tight text-white text-balance">
-                Watch two algorithms learn.
+                Watch two algorithms <AsciiGlitchRipple as="span" className="text-cyan-200">learn.</AsciiGlitchRipple>
               </h1>
               <p className="text-sm md:text-base text-slate-400 max-w-xl text-balance">
                 Lake-1 explores with Q-Learning. Lava-1 plans with Minimax. Play them, tune them, export the data.
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-1">
+                <AnimatedButton onClick={handlePlayHuman} className="px-7 py-2.5 text-sm font-semibold">
+                  Play as human
+                </AnimatedButton>
+                <button
+                  onClick={() => handleNavigate('about')}
+                  className="px-6 py-2.5 rounded-full text-sm text-slate-300 border border-white/15 hover:border-white/40 hover:text-white transition-all cursor-pointer min-h-[2.75rem]"
+                >
+                  How it works
+                </button>
+              </div>
             </div>
 
             <LiveStreamHud
@@ -632,6 +672,7 @@ export default function App() {
               </span>
             </div>
 
+            <DissolveReveal>
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start min-w-0">
               <div className="lg:col-span-3 flex flex-col order-2 lg:order-1">
                 <AgentCardLake telemetry={lakeTelemetry} isActive={currentPlayer === 'O'} />
@@ -651,6 +692,7 @@ export default function App() {
                 <AgentCardLava telemetry={lavaTelemetry} isActive={currentPlayer === 'X'} />
               </div>
             </div>
+            </DissolveReveal>
 
             {/* Lab controls live below the fold — first viewport stays clean */}
             <details className="w-full glass rounded-2xl px-5 py-4 group">
@@ -686,8 +728,12 @@ export default function App() {
         </section>
 
         <ArchitectureSection />
+        <FaqSection />
+        <CreditsSection />
         <TransmissionSection />
       </main>
+
+      {introOpen && <IntroScreen onEnter={handleIntroEnter} />}
 
       <AiNavigatorHud activeSection={activeSection} onNavigate={handleNavigate} />
 

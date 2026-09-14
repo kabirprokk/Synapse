@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX, Sliders, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
+import { SpotlightNavbar } from './ui/spotlight-navbar';
 
 interface HeaderProps {
   round: number;
@@ -17,10 +18,11 @@ interface HeaderProps {
   onOpenInspector: () => void;
 }
 
-const NAV: { id: string; label: string }[] = [
-  { id: 'arena', label: 'Arena' },
-  { id: 'about', label: 'How It Works' },
-  { id: 'contact', label: 'Feedback' },
+const NAV: { id: string; label: string; href: string }[] = [
+  { id: 'arena', label: 'Arena', href: '#arena' },
+  { id: 'about', label: 'How It Works', href: '#about' },
+  { id: 'faq', label: 'FAQ', href: '#faq' },
+  { id: 'contact', label: 'Feedback', href: '#contact' },
 ];
 
 export const Header: React.FC<HeaderProps> = ({
@@ -60,28 +62,14 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </button>
 
-        {/* Desktop nav */}
-        <nav
-          id="main-nav"
-          aria-label="Primary"
-          className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/5 border border-white/5"
-        >
-          {NAV.map(n => (
-            <button
-              key={n.id}
-              id={`nav-btn-${n.id}`}
-              onClick={() => go(n.id)}
-              aria-current={activeSection === n.id ? 'page' : undefined}
-              className={`px-4 py-1.5 transition-all text-sm rounded-full cursor-pointer ${
-                activeSection === n.id
-                  ? 'bg-white text-slate-900 font-semibold'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {n.label}
-            </button>
-          ))}
-        </nav>
+        {/* Desktop nav — VengeanceUI spotlight */}
+        <div className="hidden md:block">
+          <SpotlightNavbar
+            items={NAV.map(n => ({ label: n.label, href: n.href }))}
+            defaultActiveIndex={Math.max(0, NAV.findIndex(n => n.id === activeSection))}
+            onItemClick={(item) => go(item.href.replace('#', ''))}
+          />
+        </div>
 
         <div className="flex items-center gap-2">
           <button
@@ -133,6 +121,12 @@ export const Header: React.FC<HeaderProps> = ({
             className="text-left px-4 py-3 rounded-xl text-base text-slate-300 hover:bg-white/5 cursor-pointer sm:hidden min-h-[3rem]"
           >
             Inspector
+          </button>
+          <button
+            onClick={() => go('credits')}
+            className="text-left px-4 py-3 rounded-xl text-base text-slate-300 hover:bg-white/5 cursor-pointer min-h-[3rem]"
+          >
+            Credits
           </button>
         </nav>
       )}

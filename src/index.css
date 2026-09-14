@@ -70,3 +70,31 @@
   50% { transform: translateY(-14px); }
 }
 .animate-float-slow { animation: floatSlow 14s ease-in-out infinite; }
+
+/* VengeanceUI: animated-rays aurora drift */
+@keyframes aurora-bg {
+  0% { background-position: 50% 50%, 50% 50%; }
+  50% { background-position: 50% 100%, 50% 0%; }
+  100% { background-position: 50% 50%, 50% 50%; }
+}
+.animate-aurora-bg { animation: aurora-bg 12s ease-in-out infinite; }
+
+/* VengeanceUI: glow-border-card conic rotation */
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes glow-spin {
+  to { --glow-angle: 360deg; }
+}
+.glow-conic {
+  background: conic-gradient(
+    from var(--glow-angle),
+    var(--glow-color-1), var(--glow-color-2), var(--glow-color-3),
+    var(--glow-color-4), var(--glow-color-5), var(--glow-color-6),
+    var(--glow-color-7), var(--glow-color-8), var(--glow-color-9),
+    var(--glow-color-10), var(--glow-color-1)
+  );
+  animation: glow-spin var(--glow-animation-duration, 6s) linear infinite;
+}
