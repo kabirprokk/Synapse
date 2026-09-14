@@ -151,6 +151,28 @@ export class LakeQLearningAgent {
     return q;
   }
 
+  /**
+   * One-ply tactics: immediate win first, then block opponent's immediate win.
+   * Keeps Lake competitive vs minimax from game 1 while Q-values are still
+   * untrained. Tactical moves are still recorded in history so Bellman updates
+   * reinforce them — learning and tactics compound instead of competing.
+   */
+  public findTacticalMove(b: BoardState, symbol: 'O' | 'X' = 'O'): number | null {
+    const tryComplete = (s: 'O' | 'X'): number | null => {
+      for (const combo of WINNING_COMBOS) {
+        const [i, j, k] = combo;
+        const line = [b[i], b[j], b[k]];
+        if (line.filter(v => v === s).length === 2 && line.includes(null)) {
+          const idx = [i, j, k].find(n => b[n] === null);
+          if (idx !== undefined) return idx;
+        }
+      }
+      return null;
+    };
+    // Own immediate win takes priority over blocking.
+    return tryComplete(symbol) ?? tryComplete(symbol === 'O' ? 'X' : 'O');
+  }
+
   public chooseAction(b: BoardState): QDecision | null {
     const available: number[] = [];
     for (let i = 0; i < 9; i++) {
@@ -163,8 +185,14 @@ export class LakeQLearningAgent {
 
     let selectedAction: number;
     let isExploratory = false;
+    let isTactical = false;
 
-    if (this.rng() < this.epsilon) {
+    // Never miss a one-move win or block — even while exploring.
+    const tactical = this.findTacticalMove(b, 'O');
+    if (tactical !== null && available.includes(tactical)) {
+      selectedAction = tactical;
+      isTactical = true;
+    } else if (this.rng() < this.epsilon) {
       selectedAction = available[Math.floor(this.rng() * available.length)];
       isExploratory = true;
     } else {
@@ -189,7 +217,7 @@ export class LakeQLearningAgent {
     const r = Math.floor(selectedAction / 3);
     const c = selectedAction % 3;
     const qStr = (this.lastQVal >= 0 ? '+' : '') + this.lastQVal.toFixed(2);
-    this.lastActionDesc = `Cell (${r},${c}) • Q: ${qStr}${isExploratory ? ' [Explore]' : ''}`;
+    this.lastActionDesc = `Cell (${r},${c}) • Q: ${qStr}${isExploratory ? ' [Explore]' : ''}${isTactical ? ' [Tactical]' : ''}`;
 
     return {
       action: selectedAction,
@@ -200,6 +228,10 @@ export class LakeQLearningAgent {
   }
 
   public updatePolicy(finalReward: number): void {
+    // Bellman backprop: each step's target uses the NEXT state's best legal
+    // Q-value. Previous code used max over the CURRENT state's 9 cells
+    // (including occupied cells stuck at 0.0), which inflated targets and
+    // stalled learning vs minimax.
     let nextMaxQ = 0;
     for (let i = this.history.length - 1; i >= 0; i--) {
       const { stateKey, action } = this.history[i];
@@ -207,7 +239,14 @@ export class LakeQLearningAgent {
       const oldQ = qVals[action];
       const target = (i === this.history.length - 1) ? finalReward : -0.01 + this.gamma * nextMaxQ;
       qVals[action] = oldQ + this.alpha * (target - oldQ);
-      nextMaxQ = Math.max(...qVals);
+      // Best legal value in THIS state becomes nextMaxQ for the previous step.
+      let best = -Infinity;
+      for (let a = 0; a < 9; a++) {
+        if (stateKey[a] === '_') {
+          if (qVals[a] > best) best = qVals[a];
+        }
+      }
+      nextMaxQ = best === -Infinity ? 0 : best;
     }
     this.history = [];
     this.generation++;
