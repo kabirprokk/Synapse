@@ -13,6 +13,8 @@ export interface WinningCombo {
 
 export type ArenaSpeed = 900 | 400 | 120 | 25;
 
+export type PlayMode = 'auto' | 'human-lake' | 'human-lava';
+
 export interface LakeTelemetry {
   generation: number;
   epsilon: number;

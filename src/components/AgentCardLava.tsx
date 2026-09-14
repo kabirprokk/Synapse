@@ -25,7 +25,7 @@ export const AgentCardLava: React.FC<AgentCardLavaProps> = ({
           : 'bg-[#15070a]/80 border-[#3d161d] hover:border-[#ff334b]/40'
       }`}
     >
-      {/* Corner cyber brackets (Skiper40 style) */}
+      {/* Corner cyber brackets */}
       <span className="absolute top-2 left-2 font-mono text-[9px] text-[#ff334b]/40 select-none">┌</span>
       <span className="absolute top-2 right-2 font-mono text-[9px] text-[#ff334b]/40 select-none">┐</span>
 

@@ -28,7 +28,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <span className="text-[#ff334b]">Ai Lava-1</span>
           </span>
           <span className="font-mono text-xs text-[#8899b7]">
-            • 24/7 AI Live Stream
+            • Local experiment build
           </span>
         </div>
 

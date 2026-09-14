@@ -24,6 +24,8 @@ interface TactileMatrixProps {
   onSelectPly: (plyIndex: number) => void;
   onJumpToLive: () => void;
   onSelectSpeed: (speed: ArenaSpeed) => void;
+  isHumanTurn?: boolean;
+  onHumanMove?: (cell: number) => void;
 }
 
 export const TactileMatrix: React.FC<TactileMatrixProps> = ({
@@ -42,6 +44,8 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
   onSelectPly,
   onJumpToLive,
   onSelectSpeed,
+  isHumanTurn,
+  onHumanMove,
 }) => {
   const isWinningCell = (index: number) => {
     return winningResult?.combo?.includes(index) ?? false;
@@ -119,7 +123,7 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
         </div>
       )}
 
-      {/* 3x3 Tactile Grid Stage (Skiper40 & VengenceUI Futuristic Cyber Theme) */}
+      {/* 3x3 Tactile Grid Stage */}
       <div
         id="board-grid-wrapper"
         className="relative w-full aspect-square bg-[#060a14]/95 rounded-3xl border-2 border-[#1e2c4a] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9),inset_0_0_40px_rgba(0,0,0,0.8)] flex items-center justify-center backdrop-blur-2xl overflow-hidden group"
@@ -141,20 +145,25 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
         {/* Ambient Radial Radiance: Lake Cyan vs Lava Red */}
         <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/10 via-transparent to-[#ff334b]/10 pointer-events-none" />
 
-        {/* 3x3 Cells */}
+        {/* 3x3 Cells — clickable on human turn */}
         <div className="w-full h-full grid grid-cols-3 gap-3 relative z-10">
           {board.map((cell, index) => {
             const isWinner = isWinningCell(index);
             const isJustPlaced = highlightedPastCell === index;
+            const clickable = isHumanTurn && cell === null && !winningResult && !isViewingPast;
 
             return (
-              <div
+              <button
                 key={index}
                 id={`cell-${index}`}
+                disabled={!clickable}
+                onClick={() => onHumanMove?.(index)}
                 className={`relative rounded-2xl flex flex-col items-center justify-center select-none overflow-hidden transition-all duration-300 ${
                   cell !== null
                     ? 'bg-[#0a1224] border border-[#27385e] shadow-inner'
-                    : 'bg-[#0a1224]/50 border border-[#1b2742]'
+                    : clickable
+                      ? 'bg-[#0a1224] border border-[#00f0ff]/60 hover:border-[#00f0ff] hover:bg-[#00f0ff]/10 cursor-pointer shadow-[0_0_16px_rgba(0,240,255,0.25)]'
+                      : 'bg-[#0a1224]/50 border border-[#1b2742]'
                 } ${
                   isWinner
                     ? cell === 'O'
@@ -243,7 +252,7 @@ export const TactileMatrix: React.FC<TactileMatrixProps> = ({
                     </svg>
                   </div>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>

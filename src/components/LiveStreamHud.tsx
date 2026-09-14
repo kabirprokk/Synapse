@@ -46,7 +46,7 @@ export const LiveStreamHud: React.FC<LiveStreamHudProps> = ({
       id="live-stream-hud"
       className="w-full flex flex-col lg:flex-row items-center justify-between gap-3 bg-[#060a14]/90 border border-[#222f4d] backdrop-blur-2xl rounded-2xl p-3 md:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8),0_0_1px_1px_rgba(0,240,255,0.1)] relative overflow-hidden"
     >
-      {/* Subtle Glowing Corner Cyber Reticles (Skiper40 style) */}
+      {/* Subtle Glowing Corner Cyber Reticles */}
       <span className="absolute top-1.5 left-1.5 font-mono text-[9px] text-[#00f0ff]/40 select-none">┌</span>
       <span className="absolute top-1.5 right-1.5 font-mono text-[9px] text-[#ff334b]/40 select-none">┐</span>
       <span className="absolute bottom-1.5 left-1.5 font-mono text-[9px] text-[#00f0ff]/40 select-none">└</span>
@@ -74,7 +74,7 @@ export const LiveStreamHud: React.FC<LiveStreamHudProps> = ({
               isViewingPast ? 'text-[#ffb74d]' : 'text-[#ff6b7e]'
             }`}
           >
-            {isViewingPast ? 'DVR REPLAY MODE' : 'LIVE BROADCAST'}
+            {isViewingPast ? 'DVR REPLAY MODE' : 'LOCAL LIVE'}
           </span>
         </div>
 
@@ -82,7 +82,7 @@ export const LiveStreamHud: React.FC<LiveStreamHudProps> = ({
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0d162a]/80 border border-[#222f4d] text-[#dae2fd] font-mono text-xs">
           <Users className="w-3.5 h-3.5 text-[#00f0ff]" />
           <span className="font-semibold text-[#00f0ff]">{viewerCount.toLocaleString()}</span>
-          <span className="text-[#8899b7] hidden sm:inline">watching worldwide</span>
+          <span className="text-[#8899b7] hidden sm:inline">local</span>
         </div>
 
         {/* Uptime */}

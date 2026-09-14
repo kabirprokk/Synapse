@@ -49,12 +49,12 @@ export const LiveStreamChat: React.FC<LiveStreamChatProps> = ({
           <div className="w-2 h-2 rounded-full bg-[#ff334b] animate-ping" />
           <h3 className="font-headline text-sm font-bold text-[#dae2fd] flex items-center gap-1.5">
             <Radio className="w-4 h-4 text-[#ff334b]" />
-            LIVE STREAM CHAT
+            EXPERIMENT LOG + NOTES
           </h3>
         </div>
         <div className="flex items-center gap-1.5 font-mono text-xs text-[#8899b7]">
           <span className="text-[#00f0ff] font-semibold">{viewerCount.toLocaleString()}</span>
-          <span>online</span>
+          <span>local</span>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export const LiveStreamChat: React.FC<LiveStreamChatProps> = ({
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Send a message to the stream..."
+          placeholder="Add a lab note (stored locally)..."
           className="flex-1 bg-[#0a1224] border border-[#222f4d] rounded-full px-4 py-2 text-xs font-sans text-[#dae2fd] placeholder-[#8899b7]/50 focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50"
         />
         <button

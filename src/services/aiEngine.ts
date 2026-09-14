@@ -1,6 +1,12 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Synapse AI engines — deterministic, serializable, benchmark-ready.
+ * - Seeded RNG (mulberry32) for reproducible experiments
+ * - Q-learning agent with decay schedule + JSON export/import
+ * - Minimax agent with configurable depth + JSON export/import
+ * - Elo ratings + decision-time measurement helpers
  */
 
 import { BoardState, WinningCombo } from '../types';
@@ -30,6 +36,62 @@ export function checkWinner(board: BoardState): WinningCombo | null {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Deterministic RNG (mulberry32) — scientists can set a seed and replay runs.
+// ---------------------------------------------------------------------------
+
+export type RandomFn = () => number;
+
+export function mulberry32(seed: number): RandomFn {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+let globalSeed = 42;
+let globalRng: RandomFn = mulberry32(globalSeed);
+
+export function setGlobalSeed(seed: number): void {
+  globalSeed = seed >>> 0;
+  globalRng = mulberry32(globalSeed);
+}
+
+export function getGlobalSeed(): number {
+  return globalSeed;
+}
+
+export function globalRandom(): number {
+  return globalRng();
+}
+
+// ---------------------------------------------------------------------------
+// Elo ratings — standard zero-sum skill tracking (K=16).
+// ---------------------------------------------------------------------------
+
+export const ELO_INITIAL = 1200;
+export const ELO_K = 16;
+
+export function expectedScore(ratingA: number, ratingB: number): number {
+  return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+}
+
+export function updateElo(
+  ratingA: number,
+  ratingB: number,
+  scoreA: number // 1 = A wins, 0.5 = draw, 0 = B wins
+): { newA: number; newB: number } {
+  const ea = expectedScore(ratingA, ratingB);
+  const eb = 1 - ea;
+  const newA = ratingA + ELO_K * (scoreA - ea);
+  const newB = ratingB + ELO_K * ((1 - scoreA) - eb);
+  return { newA: Math.round(newA * 10) / 10, newB: Math.round(newB * 10) / 10 };
+}
+
 export interface QDecision {
   action: number;
   qValue: number;
@@ -47,6 +109,8 @@ export class LakeQLearningAgent {
   public alpha: number = 0.20; // Learning rate
   public gamma: number = 0.95; // Discount factor
   public epsilon: number = 0.05; // Exploration rate
+  public epsilonMin: number = 0.01;
+  public epsilonDecay: number = 0.9995; // applied per finished game
   public generation: number = 1;
   public wins: number = 0;
   public draws: number = 0;
@@ -55,9 +119,23 @@ export class LakeQLearningAgent {
   public lastActionDesc: string = 'System online';
   public lastQVal: number = 0.0;
   public lastExploratory: boolean = false;
+  public rng: RandomFn = () => globalRandom();
 
-  constructor() {
+  constructor(seed?: number) {
     // Unbiased start: completely empty Q-table. All actions start at 0.0
+    if (typeof seed === 'number') this.setSeed(seed);
+  }
+
+  public setSeed(seed: number): void {
+    this.rng = mulberry32(seed >>> 0);
+  }
+
+  public setHyperparams(p: { alpha?: number; gamma?: number; epsilon?: number; epsilonMin?: number; epsilonDecay?: number }): void {
+    if (typeof p.alpha === 'number') this.alpha = p.alpha;
+    if (typeof p.gamma === 'number') this.gamma = p.gamma;
+    if (typeof p.epsilon === 'number') this.epsilon = p.epsilon;
+    if (typeof p.epsilonMin === 'number') this.epsilonMin = p.epsilonMin;
+    if (typeof p.epsilonDecay === 'number') this.epsilonDecay = p.epsilonDecay;
   }
 
   public getStateKey(b: BoardState): string {
@@ -86,8 +164,8 @@ export class LakeQLearningAgent {
     let selectedAction: number;
     let isExploratory = false;
 
-    if (Math.random() < this.epsilon) {
-      selectedAction = available[Math.floor(Math.random() * available.length)];
+    if (this.rng() < this.epsilon) {
+      selectedAction = available[Math.floor(this.rng() * available.length)];
       isExploratory = true;
     } else {
       let bestVal = -Infinity;
@@ -101,7 +179,7 @@ export class LakeQLearningAgent {
           bestMoves.push(action);
         }
       }
-      selectedAction = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+      selectedAction = bestMoves[Math.floor(this.rng() * bestMoves.length)];
     }
 
     this.history.push({ stateKey, action: selectedAction });
@@ -133,6 +211,37 @@ export class LakeQLearningAgent {
     }
     this.history = [];
     this.generation++;
+    // Epsilon decay for reproducible learning schedules
+    this.epsilon = Math.max(this.epsilonMin, this.epsilon * this.epsilonDecay);
+  }
+
+  /** Export Q-table to plain JSON for download / versioning. */
+  public toJSON(): { alpha: number; gamma: number; epsilon: number; generation: number; wins: number; draws: number; losses: number; table: Record<string, number[]> } {
+    const table: Record<string, number[]> = {};
+    for (const [k, v] of this.qTable.entries()) table[k] = Array.from(v);
+    return { alpha: this.alpha, gamma: this.gamma, epsilon: this.epsilon, generation: this.generation, wins: this.wins, draws: this.draws, losses: this.losses, table };
+  }
+
+  public fromJSON(data: { alpha?: number; gamma?: number; epsilon?: number; generation?: number; wins?: number; draws?: number; losses?: number; table?: Record<string, number[]> }): void {
+    if (typeof data.alpha === 'number') this.alpha = data.alpha;
+    if (typeof data.gamma === 'number') this.gamma = data.gamma;
+    if (typeof data.epsilon === 'number') this.epsilon = data.epsilon;
+    if (typeof data.generation === 'number') this.generation = data.generation;
+    if (typeof data.wins === 'number') this.wins = data.wins;
+    if (typeof data.draws === 'number') this.draws = data.draws;
+    if (typeof data.losses === 'number') this.losses = data.losses;
+    if (data.table) {
+      this.qTable.clear();
+      for (const [k, arr] of Object.entries(data.table)) {
+        const v = new Float64Array(9);
+        arr.slice(0, 9).forEach((x, i) => { v[i] = Number(x) || 0; });
+        this.qTable.set(k, v);
+      }
+    }
+  }
+
+  public resetStats(): void {
+    this.wins = 0; this.draws = 0; this.losses = 0; this.generation = 1; this.history = [];
   }
 }
 
@@ -152,18 +261,28 @@ export class LavaGeneticAgent {
   public genome: number[] = [1.0, 0.5, 1.0, 0.5, 2.0, 0.5, 1.0, 0.5, 1.0];
   public generation: number = 1;
   public mutationSigma: number = 0.035;
+  public maxDepth: number = 6;
   public nodesEvaluated: number = 0;
   public wins: number = 0;
   public draws: number = 0;
   public losses: number = 0;
   public lastActionDesc: string = 'System online';
   public lastEvalScore: number = 0.0;
+  public rng: RandomFn = () => globalRandom();
+
+  public setSeed(seed: number): void {
+    this.rng = mulberry32(seed >>> 0);
+  }
+
+  public setDepth(d: number): void {
+    this.maxDepth = Math.max(1, Math.min(9, Math.floor(d)));
+  }
 
   public mutate(): void {
     for (let i = 0; i < this.genome.length; i++) {
-      // Box-Muller Gaussian mutation
-      const u1 = Math.random() || 1e-7;
-      const u2 = Math.random() || 1e-7;
+      // Box-Muller Gaussian mutation using seeded RNG
+      const u1 = this.rng() || 1e-7;
+      const u2 = this.rng() || 1e-7;
       const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
       this.genome[i] = Math.max(0.1, Number((this.genome[i] + z0 * this.mutationSigma).toFixed(3)));
     }
@@ -193,7 +312,7 @@ export class LavaGeneticAgent {
       if (res.winner === 'O') return depth - 100;
       if (res.winner === 'DRAW') return 0;
     }
-    if (depth >= 6) return this.evaluateState(b, depth);
+    if (depth >= this.maxDepth) return this.evaluateState(b, depth);
 
     const available: number[] = [];
     for (let i = 0; i < 9; i++) {
@@ -237,8 +356,8 @@ export class LavaGeneticAgent {
     let bestMoves: number[] = [];
 
     // Stochastic exploration element (3%) so matches don't lock into identical loops
-    if (Math.random() < 0.03) {
-      const randMove = available[Math.floor(Math.random() * available.length)];
+    if (this.rng() < 0.03) {
+      const randMove = available[Math.floor(this.rng() * available.length)];
       this.lastEvalScore = 0.0;
       this.lastActionDesc = `Cell (${Math.floor(randMove / 3)},${randMove % 3}) • Explore`;
       return { action: randMove, evalScore: 0.0, nodes: 1 };
@@ -256,7 +375,7 @@ export class LavaGeneticAgent {
       }
     }
 
-    const selectedMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+    const selectedMove = bestMoves[Math.floor(this.rng() * bestMoves.length)];
     this.lastEvalScore = bestScore;
     const r = Math.floor(selectedMove / 3);
     const c = selectedMove % 3;
@@ -268,5 +387,23 @@ export class LavaGeneticAgent {
       evalScore: bestScore,
       nodes: this.nodesEvaluated
     };
+  }
+
+  public toJSON(): { genome: number[]; generation: number; mutationSigma: number; maxDepth: number; wins: number; draws: number; losses: number } {
+    return { genome: [...this.genome], generation: this.generation, mutationSigma: this.mutationSigma, maxDepth: this.maxDepth, wins: this.wins, draws: this.draws, losses: this.losses };
+  }
+
+  public fromJSON(data: Partial<{ genome: number[]; generation: number; mutationSigma: number; maxDepth: number; wins: number; draws: number; losses: number }>): void {
+    if (Array.isArray(data.genome) && data.genome.length === 9) this.genome = data.genome.map(Number);
+    if (typeof data.generation === 'number') this.generation = data.generation;
+    if (typeof data.mutationSigma === 'number') this.mutationSigma = data.mutationSigma;
+    if (typeof data.maxDepth === 'number') this.setDepth(data.maxDepth);
+    if (typeof data.wins === 'number') this.wins = data.wins;
+    if (typeof data.draws === 'number') this.draws = data.draws;
+    if (typeof data.losses === 'number') this.losses = data.losses;
+  }
+
+  public resetStats(): void {
+    this.wins = 0; this.draws = 0; this.losses = 0; this.generation = 1;
   }
 }

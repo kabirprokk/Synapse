@@ -35,9 +35,9 @@ export const AiNavigatorHud: React.FC<AiNavigatorHudProps> = ({
       case 'arena':
       default:
         return {
-          badge: '24/7 LIVE STREAM COMPANION',
-          tag: 'UNSTOPPABLE LOOP',
-          text: '🔴 You are watching a 24/7 continuous live broadcast! The stream never pauses. Click any past move on the timeline to inspect previous plies, then click "JUMP TO LIVE" to return in real-time.',
+          badge: 'LOCAL EXPERIMENT SESSION',
+          tag: 'PAUSE • STEP • PLAY',
+          text: '🔬 This is a real local run — timings measured here, seed-controlled, no fake viewers. Pick AI vs AI or play yourself, then export CSV/JSON for analysis.',
         };
     }
   };

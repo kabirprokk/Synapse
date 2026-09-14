@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <span className="font-mono text-[10px] text-[#8899b7] tracking-widest uppercase mt-0.5">
-              24/7 AUTONOMOUS AI LIVE STREAM
+              LOCAL EXPERIMENT SESSION • REAL TIMINGS
             </span>
           </button>
 
@@ -59,10 +59,10 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <span className="w-2 h-2 rounded-full bg-[#ff334b] animate-ping" />
             <span className="font-mono text-[11px] text-[#ff6b7e] font-bold tracking-wide">
-              LIVE BROADCAST
+              LOCAL SESSION
             </span>
             <span className="font-mono text-[11px] text-[#8899b7]">
-              • {viewerCount.toLocaleString()} watching
+              • {viewerCount.toLocaleString()} here (you)
             </span>
           </div>
         </div>

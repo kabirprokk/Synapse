@@ -27,7 +27,7 @@ export const ArchitectureSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 2-Column Comparison Cards (Skiper40 Cyber Bento Style) */}
+        {/* 2-Column Comparison Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {/* Card 1: Ai Lake-1 */}
           <div className="relative rounded-3xl p-6 md:p-8 bg-[#061224]/80 border border-[#00f0ff]/30 shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(0,240,255,0.15)] flex flex-col gap-5 overflow-hidden">
