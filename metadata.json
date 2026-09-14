@@ -1,0 +1,6 @@
+{
+  "name": "Synapse Neuro-Evolution Arena",
+  "description": "24/7 autonomous live broadcast of Ai Lake-1 (unbiased Q-Learning) battling Ai Lava-1 (symmetrical Minimax & Genetic Evolution) in real time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
