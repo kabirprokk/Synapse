@@ -609,7 +609,7 @@ export default function App() {
                 {cloudUid ? `Firebase connected • anon ${cloudUid.slice(0, 6)}…` : 'Firebase connecting… (enable Anonymous Auth)'}
               </span>
               <span className="text-[#8899b7]">
-                project: synapse-ai-inovation • {cloudOk === true ? 'last cloud write OK' : cloudOk === false ? 'local only (check Firestore rules)' : 'sync pending'} • live at synapse-ai-inovation.web.app after deploy
+                live: synarena.web.app • mirror: synapse-ai-inovation.web.app • {cloudOk === true ? 'last cloud write OK' : cloudOk === false ? 'local only (enable Anonymous Auth + check rules)' : 'sync pending'}
               </span>
               {globalElo && (
                 <span className="ml-auto text-[#7df4ff]">

@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <span className="font-mono text-[10px] text-[#8899b7] tracking-widest uppercase mt-0.5">
-              LOCAL EXPERIMENT SESSION • REAL TIMINGS
+              CLOUD-SYNCED SESSION • SYNArena
             </span>
           </button>
 
